@@ -1,0 +1,25 @@
+﻿@{
+    ViewData["Title"] = "Error";
+}
+
+<h1 class="text-danger">Fel.</h1>
+<h2 class="text-danger">Något gick fel, din begäran kunde inte hanteras.</h2>
+
+<h3>Felmeddelande:</h3>
+<div class="row">
+    <ul>
+        @{
+            if (ViewBag.Error.GetType().IsGenericType && ViewBag.Error.GetType().GetGenericTypeDefinition() == typeof(List<>))
+            {
+                foreach (var error in ViewBag.Error)
+                {
+                    <li>@error</li>
+                }
+            }
+            else
+            {
+                <li>@ViewBag.Error</li>
+            }
+        }
+    </ul>
+</div>

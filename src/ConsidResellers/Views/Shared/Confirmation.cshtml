@@ -1,0 +1,11 @@
+﻿@model ConsidResellers.Models.ViewModels.ConfirmationViewModel
+<div class="row">
+    <h1>Är du säker?</h1>
+    <h3>@Model.Message</h3>
+</div>
+<div class="row top20">
+    <form class="form-horizontal" asp-controller="@Model.RouteController" asp-action="@Model.RouteAction" asp-route-id="@ViewBag.Id">
+        <a href="javascript:void(0);" onclick="history.go(-1);" class="btn btn-default">Avbryt</a>
+        <button type="submit" class="btn btn-primary">Ja</button>
+    </form>
+</div>

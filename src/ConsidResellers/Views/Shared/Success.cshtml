@@ -1,0 +1,6 @@
+﻿@model ConsidResellers.Models.ViewModels.ConfirmationViewModel
+<div class="row">
+    <h1>Lyckades!</h1>
+    <h3>@Model.Message</h3>
+    <a asp-action="@Model.RouteAction" asp-controller="@Model.RouteController" class="btn btn-primary btn-lg top20">OK</a>
+</div>

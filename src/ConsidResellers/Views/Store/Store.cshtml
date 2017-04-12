@@ -1,0 +1,97 @@
+﻿@model ConsidResellers.Models.ViewModels.StoreViewModel
+<div class="row">
+    <h2>@Model.Name</h2>
+    <div class="row">
+        <a class="btn btn-primary" asp-area="" asp-controller="Store" asp-action="Edit" asp-route-id="@Model.Id">Redigera butik</a>
+        <a class="btn btn-primary" asp-area="" asp-controller="Store" asp-action="ConfirmRemoval" asp-route-id="@Model.Id">Ta bort butik</a>
+        <hr />
+    </div>
+    <div class="col-lg-12">
+        <span class="col-lg-2">Företag:</span>
+        <span class="col-lg-10"><a asp-are="" asp-controller="Company" asp-action="Get" asp-route-id="@Model.CompanyId">@Model.CompanyName</a></span>
+    </div>
+    <div class="col-lg-12">
+        <span class="col-lg-2">Adress:</span>
+        <span class="col-lg-10">@Model.Address</span>
+    </div>
+    <div class="col-lg-12">
+        <span class="col-lg-2">Postnummer:</span>
+        <span class="col-lg-10">@Model.Zip</span>
+    </div>
+    <div class="col-lg-12">
+        <span class="col-lg-2">Stad:</span>
+        <span class="col-lg-10">@Model.City</span>
+    </div>
+    <div class="col-lg-12">
+        <span class="col-lg-2">Land:</span>
+        <span class="col-lg-10">@Model.Country</span>
+    </div>
+    <div class="col-lg-12">
+        <span class="col-lg-2">Longitud:</span>
+        <span class="col-lg-10">
+            @if (Model.Longitude == null) { Model.Longitude = "-"; }
+            @Model.Longitude
+        </span>
+    </div>
+    <div class="col-lg-12">
+        <span class="col-lg-2">Latitud:</span>
+        <span class="col-lg-10">
+            @if (Model.Latitude == null) { Model.Latitude = "-"; }
+            @Model.Latitude
+        </span>
+    </div>
+    <hr />
+</div>
+
+<div class="row top20">
+    <div class="col-lg-12">
+        <div id="map"></div>
+    </div>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script type="text/javascript">
+    var map;
+    var geocode;
+    var infowindow;
+    var marker;
+
+    function initMap() {
+        @{
+            string lat = "0.0";
+            string longi = "0.0";
+
+            if (!string.IsNullOrEmpty(Model.Latitude) && Model.Latitude != "-")
+            {
+                lat = Model.Latitude;
+            }
+            if (!string.IsNullOrEmpty(Model.Longitude) && Model.Latitude != "-")
+            {
+                longi = Model.Longitude;
+            }
+        }
+
+        geocoder = new google.maps.Geocoder();
+        infowindow = new google.maps.InfoWindow;
+        map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 15,
+            center: { lat: @lat, lng: @longi }
+        });
+        placeMarker(new google.maps.LatLng(@lat, @longi));
+    }
+
+    function placeMarker(location) {
+        if ( marker ) {
+            marker.setPosition(location);
+        } else {
+            marker = new google.maps.Marker({
+                position: location,
+                map: map
+            });
+        }
+    }
+
+</script>
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCweOU-ghtwi83gkCaSXC_r2DvINcwUixk&callback=initMap">
+</script>

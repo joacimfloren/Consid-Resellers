@@ -1,0 +1,36 @@
+﻿@model ConsidResellers.Models.ViewModels.CompanyViewModel
+<div class="row">
+    <h1>Företag</h1>
+    <hr />
+</div>
+<div class="row top20">
+    <form class="form-horizontal" asp-controller="Company" asp-action="Edit">
+        <div class="form-group">
+            <label class="col-lg-2 control-label" asp-for="Name"></label>
+            <div class="col-lg-10">
+                <input class="form-control" asp-for="Name" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="OrganizationNumber" class="col-lg-2 control-label"></label>
+            <div class="col-lg-10">
+                <input class="form-control" asp-for="OrganizationNumber" />
+                <span asp-validation-for="OrganizationNumber" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="Notes" class="col-lg-2 control-label"></label>
+            <div class="col-lg-10">
+                <textarea class="form-control" asp-for="Notes"></textarea>
+                <span asp-validation-for="Notes" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-lg-10 col-lg-offset-2">
+                <a href="javascript:void(0);" onclick="history.go(-1);" class="btn btn-default">Avbryt</a>
+                <button type="submit" class="btn btn-primary">Spara</button>
+            </div>
+        </div>
+    </form>
+</div>

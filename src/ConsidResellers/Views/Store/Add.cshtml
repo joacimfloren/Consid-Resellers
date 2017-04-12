@@ -1,0 +1,328 @@
+﻿@model ConsidResellers.Models.ViewModels.StoreAddViewModel
+<div class="row">
+    <h1>Lägg till butik</h1>
+    <hr />
+</div>
+<div class="row top20">
+    <form class="form-horizontal" asp-controller="Store" asp-action="Add">
+        <div class="form-group">
+            <label class="col-lg-2 control-label" asp-for="Store.Name"></label>
+            <div class="col-lg-10">
+                <input class="form-control" asp-for="Store.Name" />
+                <span asp-validation-for="Store.Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg-2 control-label">Företag</label>
+            <div class="col-lg-10">
+                <select class="form-control" asp-for="Store.CompanyId" asp-items="@Model.CompanyList">
+                    <option value="">Var vänlig välj...</option>
+                </select>
+                <span asp-validation-for="Store.CompanyId" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="Store.Address" class="col-lg-2 control-label"></label>
+            <div class="col-lg-10">
+                <input id="address" class="form-control" asp-for="Store.Address" />
+                <span asp-validation-for="Store.Address" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="Store.Zip" class="col-lg-2 control-label"></label>
+            <div class="col-lg-10">
+                <input id="zip" class="form-control" asp-for="Store.Zip" />
+                <span asp-validation-for="Store.Zip" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="Store.City" class="col-lg-2 control-label"></label>
+            <div class="col-lg-10">
+                <input id="city" class="form-control" asp-for="Store.City" />
+                <span asp-validation-for="Store.City" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="Store.Country" class="col-lg-2 control-label"></label>
+            <div class="col-lg-10">
+                <input id="country" class="form-control" asp-for="Store.Country" />
+                <span asp-validation-for="Store.Country" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="Store.Latitude" class="col-lg-2 control-label"></label>
+            <div class="col-lg-10">
+                <input id="latitude" class="form-control" asp-for="Store.Latitude" />
+                <span asp-validation-for="Store.Latitude" class="text-danger"></span>
+                <span class="text-danger" id="latitudeValidation"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="Store.Longitude" class="col-lg-2 control-label"></label>
+            <div class="col-lg-10">
+                <input id="longitude" class="form-control" asp-for="Store.Longitude" />
+                <span asp-validation-for="Store.Longitude" class="text-danger"></span>
+                <span class="text-danger" id="longitudeValidation"></span>
+            </div>
+        </div>       
+        <div class="form-group">
+            <div class="col-lg-12 col-lg-offset-2">
+                <span class="text-warning" id="mapValidation"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-lg-12 col-lg-offset-2">
+                <a href="javascript:void(0);" id="getAddress" class="btn btn-warning">Uppdatera adress från kordinater</a>
+            </div>
+            <div class="col-lg-12 col-lg-offset-2 top20">
+                <a href="javascript:void(0);" id="getCords" class="btn btn-info">Uppdatera kordinater från adress</a>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-lg-10 col-lg-offset-2">
+                <a href="javascript:void(0);" onclick="history.go(-1);" class="btn btn-default">Avbryt</a>
+                <button type="submit" class="btn btn-primary">Spara</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="row top20">
+    <div class="col-lg-12">
+        <div id="map"></div>
+    </div>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script type="text/javascript">
+    var map;
+    var geocode;
+    var infowindow;
+    var marker;
+
+    $('form').submit(function (evt) {
+        var longError = false;
+        var latError = false;
+        var longitude = $('#longitude').val();
+        var latitude = $('#latitude').val();
+
+        if (longitude != "") {
+            longError = longitudeError(longitude);
+        }
+
+        if (latitude != "") {
+            latError = latitudeError(latitude);
+        }
+
+        if (longError || latError) {
+            return false;
+        }
+        else {
+            if (latitude == "" && longitude != "" || latitude != "" && longitude == "") {
+                $('#longitudeValidation').text('Om en longitud angetts måste en latitud anges.');
+                $('#latitudeValidation').text('Om en latitude angetts måste en longitud anges.');
+                return false;
+            }  
+            return true;
+        }
+    });
+
+    function longitudeError(longitude) {
+        var error = false;
+        var long = longitude.match(/^(\+|-)?(?:180(?:(?:\.0{1,7})?)|(?:[0-9]|[1-9][0-9]|1[0-7][0-9])(?:(?:\.[0-9]{1,7})?))$/);
+        $('#longitudeValidation').text('');
+        if (!long) {
+            error = true;
+            $('#longitudeValidation').text('Longituden måste vara mellan -180 och 180 och max innehålla 7 decimaler med punkt som avskiljare.');
+        }
+        return error;
+    }
+
+    function latitudeError(latitude) {
+        var error = false;
+        var lat = latitude.match(/^(\+|-)?(?:90(?:(?:\.0{1,7})?)|(?:[0-9]|[1-8][0-9])(?:(?:\.[0-9]{1,7})?))$/);
+        $('#latitudeValidation').text('');
+        if (!lat) {
+            error = true;
+            $('#latitudeValidation').text('Latituden måste vara mellan -90 och 90 och max innehålla 7 decimaler med punkt som avskiljare.');
+        }
+        return error;
+    }
+
+    $('#getAddress').click(function () {
+        var longError = false;
+        var latError = false;
+        var longitude = $('#longitude').val();
+        var latitude = $('#latitude').val();
+
+        if (longitude != "") {
+            longError = longitudeError(longitude);
+        }
+
+        if (latitude != "") {
+            latError = latitudeError(latitude);
+        }
+
+        if (longError || latError) {
+            return false;
+        }
+        else {
+            var input = longitude + ',' + latitude;
+            geocodeLatLng(geocoder, map, infowindow, input);
+        }
+    });
+
+    $('#getCords').click(function () {
+        var address = $('#address').val();
+        var zip = $('#zip').val();
+        var city = $('#city').val();
+        var country = $('#country').val();
+
+        var searchAddress = address + ', ' + zip + ', ' + city + ', ' + country;
+        geocodeAddress(geocoder, map, infowindow, searchAddress);
+    });
+
+    function initMap() {
+        @{
+            string lat = "0.0";
+            string longi = "0.0";
+
+            if (!string.IsNullOrEmpty(Model.Store.Latitude))
+            {
+                lat = Model.Store.Latitude;
+            }
+            if (!string.IsNullOrEmpty(Model.Store.Longitude))
+            {
+                longi = Model.Store.Longitude;
+            }
+        }
+
+        geocoder = new google.maps.Geocoder();
+        infowindow = new google.maps.InfoWindow;
+        map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 15,
+            center: { lat: @lat, lng: @longi }
+        });
+        placeMarker(new google.maps.LatLng(@lat, @longi));
+    }
+
+    function geocodeAddress(geocoder, resultsMap, infowindow, input) {
+        var address = input;
+        geocoder.geocode({ 'address': address }, function (results, status) {
+            if (status === 'OK') {
+                resultsMap.setCenter(results[0].geometry.location);
+                resultsMap.setZoom(15);
+                placeMarker(results[0].geometry.location);
+                infowindow.setContent(address);
+                infowindow.open(map, marker);
+                var myLatLng = marker.getPosition();
+                var lati = String(myLatLng.lat()).substring(0, 9);
+                var longi = String(myLatLng.lng()).substring(0, 9);
+                $('#longitude').val(longi);
+                $('#latitude').val(lati);
+            } else {
+                if (status == "ZERO_RESULTS") {
+                    $('#mapValidation').text('Inga kordinater hittades till den angivna adressen.');
+                }
+                else {
+                    $('#mapValidation').text('Geocoder failed due to: ' + status);
+                }
+            }
+        });
+    }
+
+    function geocodeLatLng(geocoder, map, infowindow, input) {
+        var latlngStr = input.split(',', 2);
+        var latlng = { lat: parseFloat(latlngStr[0]), lng: parseFloat(latlngStr[1]) };
+        geocoder.geocode({ 'location': latlng }, function (results, status) {
+            $('#mapValidation').text('');
+            if (status === 'OK') {
+                if (results[1]) {
+
+                    var arrAddress = results[0].address_components;
+                    var itemRoute = '';
+                    var itemLocality = '';
+                    var itemCountry = '';
+                    var itemPc = '';
+                    var itemSnumber = '';
+                    $.each(arrAddress, function (i, address_component) {
+                        console.log('address_component:' + i);
+
+                        if (address_component.types[0] == "route") {
+                            itemRoute = address_component.long_name;
+                        }
+
+                        if (address_component.types[0] == "premise") {
+                            if (itemRoute == "") {
+                                itemRoute = address_component.long_name;
+                            }
+                        }
+
+                        if (address_component.types[0] == "locality") {
+                            if (itemLocality == "") {
+                                itemLocality = address_component.long_name;
+                            }
+                        }
+
+                        if (address_component.types[0] == "country") {
+                            itemCountry = address_component.long_name;
+                        }
+
+                        if (address_component.types[0] == "postal_code_prefix") {;
+                            itemPc = address_component.long_name;
+                        }
+
+                        if (address_component.types[0] == "administrative_area_level_1")
+                        {
+                            if (itemLocality == "") {
+                                itemLocality = address_component.long_name;
+                            }
+                        }
+
+                        if (address_component.types[0] == "postal_code") {
+                            itemPc = address_component.long_name;
+                        }
+
+                        if (address_component.types[0] == "street_number") {
+                            itemSnumber = address_component.long_name;
+                        }
+                    });
+
+                    $('#address').val(itemRoute + ' ' + itemSnumber);
+                    $('#zip').val(itemPc);
+                    $('#city').val(itemLocality);
+                    $('#country').val(itemCountry);
+
+                    map.setZoom(15);
+                    placeMarker(latlng);
+                    infowindow.setContent(results[0].formatted_address);
+                    infowindow.open(map, marker);
+                } else {
+                    $('#mapValidation').text('Ingen adress hittades med angivna kordinater.');
+                }
+            } else {
+                if (status == "ZERO_RESULTS") {
+                    $('#mapValidation').text('Ingen adress hittades med angivna kordinater.');
+                }
+                else {
+                    $('#mapValidation').text('Geocoder failed due to: ' + status);
+                }
+            }
+        });
+    }
+
+    function placeMarker(location) {
+        if ( marker ) {
+            marker.setPosition(location);
+        } else {
+            marker = new google.maps.Marker({
+                position: location,
+                map: map
+            });
+        }
+    }
+
+</script>
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCweOU-ghtwi83gkCaSXC_r2DvINcwUixk&callback=initMap">
+</script>
